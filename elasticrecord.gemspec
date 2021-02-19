@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.files = %w[CHANGELOG.md LICENSE.md README.md LICENSE elasticrecord.gemspec] + Dir['lib/**/*.rb']
   spec.homepage = 'https://github.com/communit-team/elasticrecord'
   spec.licenses = %w["GNU GENERAL PUBLIC LICENSE"]
-  spec.name = 'elatsicrecord'
+  spec.name = 'elasticrecord'
   spec.require_paths = %w[lib]
   spec.required_ruby_version = '>= 2.3.1'
   spec.summary = spec.description
