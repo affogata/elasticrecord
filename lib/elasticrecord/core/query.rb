@@ -7,6 +7,7 @@ module ElasticRecord
         ElasticRecord::Search.new(self,
                                   types: type || self.default_type,
                                   index: index || self.default_index,
+                                  nested_fields: self.nested_fields,
                                   default_field: self.default_field,
         )
       end

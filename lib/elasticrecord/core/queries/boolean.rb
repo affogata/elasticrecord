@@ -9,11 +9,13 @@ module ElasticRecord
       def bool(body, query_type: :must, term_type: 'term', **args)
         term_type = 'terms' if term_type == 'term' and (body.is_a?(Array) or (body.is_a?(Hash) and body.values[0].is_a?(Array)))
 
-        if @bool.nil?
+        query = self.nest!(term_type, body)
+
+        if @bool.blank?
           @bool = Search::Queries::Bool.new
-          self.query.query = @bool.send(query_type, {term_type => body}, **args)
+          self.query.query = @bool.send(query_type, query, **args)
         else
-          @bool.send(query_type, {term_type => body}, **args)
+          @bool.send(query_type, query, **args)
         end
 
         return self
@@ -51,6 +53,28 @@ module ElasticRecord
 
       def exists(body, **args)
         self.bool({field: body}, term_type: :exists, **args)
+      end
+
+      def nest!(term_type, body={})
+        body.each_pair do |field, v|
+          field = field.to_s
+
+          sub_fields = field.split(".")
+
+          sub_fields.each_with_index do |sub_field, i|
+            # the nested field can either be a sub-field (i.e. "driver"), or an
+            # attribute under that sub-field (i.e. "driver.vehicle")
+            full_sub_field = sub_fields[0..i].join(".")
+
+            # nested_fields are assigned in the Elastic::Record class
+            # using the `nested_field :<field_name>` notation
+            if self.nested_fields.include?(full_sub_field.to_s)
+              return {nested: {path: sub_field, query: {term_type => {field => v}}}}
+            end
+          end
+        end
+
+        return {term_type => body}
       end
     end
   end
